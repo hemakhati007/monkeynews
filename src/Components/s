@@ -1,0 +1,12 @@
+
+
+
+
+
+
+
+<Route path="/"> {/*for home */}
+           
+    <News pageSize={5} country={"in"} category={"sports"}/>
+      
+    </Route>
