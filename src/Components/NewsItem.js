@@ -1,12 +1,13 @@
-import React, { Component } from 'react'
+// import React, { Component } from 'react'
+import React from 'react'
 
-export class NewsItem extends Component {
+const NewsItem=(props)=>{
 
       
 
-  render() {
+ 
     // newsurl are for the unique identity of news
-    let {title,description,imgurl,newsurl ,author,date,source}=this.props; 
+    let {title,description,imgurl,newsurl ,author,date,source}=props; 
     // this.prop have title and description whuch destructuring is happening the values are getting pull
     return (
       <div className='my-3'>
@@ -22,7 +23,7 @@ export class NewsItem extends Component {
           </div>
       </div> 
     )
-  }
+
 }
 
 export default NewsItem

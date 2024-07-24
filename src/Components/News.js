@@ -1,4 +1,6 @@
-import React, { Component } from "react";
+import React, { useEffect ,useState} from "react";
+
+
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
@@ -6,187 +8,97 @@ import PropTypes from "prop-types";
 
 import InfiniteScroll from "react-infinite-scroll-component";
 
-export default class News extends Component {
-  static defaultProps = {
-    country: "in",
-    pageSize: 5,
-    category: "general",
-    totalResult: 0,
-  };
+const News=({ country="in",pageSize=5,category="general",setProgress,apiKey})=>{
+ 
+  
 
-  static propTypes = {
-    country: PropTypes.string,
-    pageSize: PropTypes.number,
-    category: PropTypes.string,
-  };
-  // articles= [
-  //     {
-  //       "source": { "id": "espn-cric-info", "name": "ESPN Cric Info" },
-  //       "author": null,
-  //       "title": "PCB hands Umar Akmal three-year ban from all cricket | ESPNcricinfo.com",
-  //       "description": "Penalty after the batsman pleaded guilty to not reporting corrupt approaches | ESPNcricinfo.com",
-  //       "url": "http://www.espncricinfo.com/story/_/id/29103103/pcb-hands-umar-akmal-three-year-ban-all-cricket",
-  //       "urlToImage": "https://a4.espncdn.com/combiner/i?img=%2Fi%2Fcricket%2Fcricinfo%2F1099495_800x450.jpg",
-  //       "publishedAt": "2020-04-27T11:41:47Z",
-  //       "content": "Umar Akmal's troubled cricket career has hit its biggest roadblock yet, with the PCB handing him a ban from all representative cricket for three years after he pleaded guilty of failing to report det… [+1506 chars]"
-  //     },
-  //     {
-  //       "source": { "id": "espn-cric-info", "name": "ESPN Cric Info" },
-  //       "author": null,
-  //       "title": "What we learned from watching the 1992 World Cup final in full again | ESPNcricinfo.com",
-  //       "description": "Wides, lbw calls, swing - plenty of things were different in white-ball cricket back then | ESPNcricinfo.com",
-  //       "url": "http://www.espncricinfo.com/story/_/id/28970907/learned-watching-1992-world-cup-final-full-again",
-  //       "urlToImage": "https://a4.espncdn.com/combiner/i?img=%2Fi%2Fcricket%2Fcricinfo%2F1219926_1296x729.jpg",
-  //       "publishedAt": "2020-03-30T15:26:05Z",
-  //       "content": "Last week, we at ESPNcricinfo did something we have been thinking of doing for eight years now: pretend-live ball-by-ball commentary for a classic cricket match. We knew the result, yes, but we tried… [+6823 chars]"
-  //     }
-  //   ]
+   const[articles,setArticles]=useState([])
+   const[loading,setLoading]=useState(false)
+   const[page,setPage]=useState(1)
+   const[totalResult,settotalResults]=useState(0)
+   
 
-  //flow constructor render than cdm
-  constructor(props) {
-    super(props); //necessary to call super class of it
-    console.log("hello");
-    this.state = {
-      articles: [], //artucle is an array
-      loading: false,
-      page: 1,
-    };
-    document.title = this.props.category;
-  }
+  
+  //  document.title =  category;
 
   //FETCHING DATA FROM API
 
   //  single function  to udate news for next prev function
 
-  async updateNews() {
-    this.props.setProgress(0);
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-    this.setState({ loading: false });
+ const updateNews= async() =>{
+     setProgress(10);
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apiKey=${ apiKey}&page=${page}&pageSize=${ pageSize}`;
+    setLoading(false);
     let data = await fetch(url); //fetching data from api
+     setProgress(30);
     let parsedData = await data.json(); //parsing data to json
-
-    // setting the state for the data
-    this.setState({
-      articles: parsedData.articles,
-      totalResult: parsedData.totalResults,
-      loading: false,
-    });
-    this.props.setProgress(100);
+     setProgress(50);
+    setArticles(parsedData.articles);
+    settotalResults(parsedData.totalResults);
+    setLoading(false);
+    
+   
+     setProgress(100);
   }
+   
+  useEffect(()=>
+  {
+    updateNews();
+  },[])
+  
 
-  //async function cuz we want to await the dat to be fetched
-  async componentDidMount() {
-    // let url=`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=b72b5f77d1e44041ae78c348821512fc&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-    // let url=`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=ce16821afe244d4eb3d785b3c9d37c43&page=1&pageSize=${this.props.pageSize}`;
-    // this.setState({loading:true});
-    // let data= await fetch(url);//fetching data from api
-    // let parsedData=await data.json()//parsing data to json
+  // const handlePrev = async () => {
+   
 
-    // // setting the state for the data
-    // this.setState({articles:parsedData.articles,totalResult:parsedData.totalResults,loading:false});
-    // acessing total article no in fetched dat
-    this.updateNews();
-
-  }
-
-  handlePrev = async () => {
-    //    console.log("prev");
-    //    let url=`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=ce16821afe244d4eb3d785b3c9d37c43&page=${this.state.page-1}&pageSize=${this.props.pageSize}`;
-    //    this.setState({loading:true});
-    //   let data= await fetch(url);
-    //   let parsedData=await data.json();
-
-    // this.setState(
-    //   {
-    //     page: this.state.page-1,
-    //    articles:parsedData.articles,
-    //    loading:false
-    //   }
-    // );
-
-    this.setState({
-      page: this.state.page - 1,
-    });
-    this.updateNews();
-  };
+  //   setPage(page+1);
+  //  updateNews();
+  // };
 
   //onclicking next button we wanta handleNext method to fetch nest page content
 
-  handleNext = async () => {
-    //   let url=`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=ce16821afe244d4eb3d785b3c9d37c43&page=${this.state.page+1}&pageSize=${this.props.pageSize}`;
-    //   this.setState({loading:true});
-    //   let data= await fetch(url);
-    //   let parsedData=await data.json();
+  // const handleNext = async () => {
+   
+  //   setPage(page+1);
+  // updateNews();
+  // };
 
-    // this.setState(
-    //   {
-    //     page: this.state.page+1,
-    //   articles:parsedData.articles,
-    //   loading:false
-    //   }
-
-    // );
-    this.setState({
-      page: this.state.page + 1,
-    });
-    this.updateNews();
-  };
-
-  fetchMoreData = async () => {
-    this.setState({ page: this.state.page + 1 });
+  const fetchMoreData = async () => {
+    setPage(page+1);
     // /updating function
 
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    const url = `https://newsapi.org/v2/top-headlines?country=${ country}&category=${ category}&apiKey=${ apiKey}&page=${page}&pageSize=${ pageSize}`;
 
     let data = await fetch(url); //fetching data from api
     let parsedData = await data.json(); //parsing data to json
 
-    // setting the state for the data
-    this.setState({
-      articles: this.state.articles.concat(parsedData.articles),
-      totalResult: parsedData.totalResults,
-      loading: false,
-    });
-    console.log(this.state.articles.length,this.state.totalResult);
+    setArticles( articles.concat(parsedData.articles));
+    settotalResults(parsedData.totalResults);
+    setLoading(false);
+   // console.log(this.state.articles.length,this.state.totalResult);
 
   };
 
-  render() {
+  
     return (
       <div className=" container my-3">
         <h2
           className="text-center"
           style={{ margin: "30px 35px" }}
-        >{`MonkeyNews -${this.props.category} Top Headlines`}</h2>
-        {this.state.loading&& <Spinner/>}
+        >{`MonkeyNews -${ category} Top Headlines`}</h2>
+        {loading&& <Spinner/>}
 
-        {/* BOOTSTRAP */}
-
-        {/* single row */}
-
-        {/* column of 3  rows but as we have only one item than one column?? */}
-
-        {/* in medium devices it will take 3columns , in bootstrap 12 column grid is present
-                to take full space of conatiner make it 4 ===4*3=12 12 column grid */}
-
-        {/* <div className="col-md-4">
-                
-                <NewsItem  title="mytitle" description="mydesc" imgurl="https://a4.espncdn.com/combiner/i?img=%2Fi%2Fcricket%2Fcricinfo%2F1099495_800x450.jpg" />
-            </div> */}
-
-        {/* returning the elements in the article to show up in DOM  */}
         <InfiniteScroll
-          dataLength={this.state.articles.length}
-          next={this.fetchMoreData}
-          hasMore={this.state.articles.length < this.state.totalResult}
+          dataLength={articles.length}
+          next={fetchMoreData}
+          hasMore={articles.length <totalResult}
           loader={<Spinner />}
         >
           <div className="container">
             <div className="row">
 
-                {this.state.articles.map((element) => {
+                {articles.map((element) => {
                   return (
-                    <div className="col-md-4" key={`${this.state.articles.title}-${this.state.articles.index}-${Math.random()}`}>
+                    <div className="col-md-4" key={`${articles.title}-${articles.index}-${Math.random()}`}>
                       <NewsItem
                         title={element.title ? element.title.slice(0, 45) : ""}
                         description={
@@ -210,16 +122,15 @@ export default class News extends Component {
           </div>
         </InfiniteScroll>
 
-        {/* in the class row  the columns we add they will auto sligin themselves  */}
-        {/* previously used befor iteration */}
-        {/* replicating the column so we can have multuple columns in a row
-            <div className="col-md-4">
-                <NewsItem  title="mytitle" description="mydesc"/>
-            </div>
-            <div className="col-md-4">
-                <NewsItem  title="mytitle" description="mydesc"/>
-         </div> */}
+      
       </div>
     );
-  }
-}
+
+};
+
+News.propTypes = {
+  country: PropTypes.string,
+  pageSize: PropTypes.number,
+  category: PropTypes.string,
+};
+export default News;
